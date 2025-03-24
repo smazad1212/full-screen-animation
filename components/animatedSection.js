@@ -3,19 +3,6 @@
 import { useEffect } from 'react';
 import styles from '@/app/page.module.css';
 
-const throttle = (func, limit) => {
-  let inThrottle;
-  return function () {
-    const args = arguments;
-    const context = this;
-    if (!inThrottle) {
-      func.apply(context, args);
-      inThrottle = true;
-      setTimeout(() => inThrottle = false, limit);
-    }
-  }
-};
-
 const AnimatedSection = () => {
   useEffect(() => {
     const container = document.querySelector(`.${styles.container}`);
@@ -30,7 +17,6 @@ const AnimatedSection = () => {
     let imageViewed = false;
     let animationInProgress = false;
     let delayScrolling = false;
-    let animationCompleted = false;
 
     const waitForAnimationComplete = () => {
       animationInProgress = true;
@@ -41,19 +27,8 @@ const AnimatedSection = () => {
       }, 800);
     }
 
-    const resetAnimation = () => {
-      console.log("reset animation");
-      title.classList.remove(styles.titleShown);
-      paragraph.classList.remove(styles.bottomUpAnimationShow, styles.paragraphShown);
-      animatedImage.classList.remove(styles.bottomUpAnimationShow);
-      titleViewed = false;
-      paragraphViewed = false;
-      imageViewed = false;
-    }
-
     const handleAnimation = (direction) => {
       let isContainerInView = (extra.getBoundingClientRect().top < container.getBoundingClientRect().bottom) && !(container.getBoundingClientRect().top < 0);
-      //if (isContainerInView && !section.classList.contains(styles.sectionAnimationCompleted)) {
       if (isContainerInView) {
         console.log("container in view: ", isContainerInView, direction);
         if (direction === "down") {
@@ -74,12 +49,9 @@ const AnimatedSection = () => {
             imageViewed = true;
             waitForAnimationComplete();
             delayScrolling = true;
-            console.log("final frame");
             setTimeout(() => {
-              console.log("done");
               window.scrollTo(0, scrollY + extra.getBoundingClientRect().top);
               delayScrolling = false;
-              // animationCompleted = true;
             }, 1000);
             return;
           }
@@ -101,44 +73,29 @@ const AnimatedSection = () => {
             titleViewed = false;
             waitForAnimationComplete();
             delayScrolling = true;
-            console.log("final frame");
             setTimeout(() => {
-              console.log("done");
               window.scrollTo(0, scrollY + section.getBoundingClientRect().top);
               delayScrolling = false;
-              // animationCompleted = true;
             }, 1000);
             return;
           }
         }
-        // if (animationCompleted) {
-        //   extra.remove();
-        //   section.classList.add(styles.sectionAnimationCompleted);
-        // }
-      } else {
-        // resetAnimation();
       }
     }
 
-    // window.addEventListener("scroll", handleScroll, { passive: false });
-    let stopScrolling = false;
-
     function handleScroll() {
-      // console.log("previousScrollY", previousScrollY);
       let currentScrollY = window.scrollY;
       if (animationInProgress || delayScrolling) {
         console.log("slow down scrolling");
         window.scrollTo(0, previousScrollY);
         return;
       }
-      // console.log("animation in progress or delay scrolling", animationInProgress, delayScrolling);
       if (currentScrollY >= previousScrollY) {
         handleAnimation("down");
       }
       else {
         handleAnimation("up");
       }
-      // console.log("currentScrollY: ", currentScrollY);
       previousScrollY = currentScrollY;
     }
 
